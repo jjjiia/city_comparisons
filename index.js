@@ -18,8 +18,8 @@ var config = {
 var global = {
 	data: null,
 	nycPaths: null,
-	usMapWidth:600,
-	usMapHeight:600
+	usMapWidth:1200,
+	usMapHeight:1200
 	
 }
 $(function() {
@@ -29,17 +29,14 @@ $(function() {
 		.await(dataDidLoad);
 })
 
-function dataDidLoad(error, ny, data) {
-	global.nycPaths = ny
-	global.data = data
+function dataDidLoad(error, nyc, nycdata) {
 	//var nycMap = initNycMap(ny, data, column, svg, max)
 	
 	
-	var nycMap = initNycMap(ny, data, "median income", "#svg-nyc-income", 100000)
-	initNycMap(ny, data, "Total", "#svg-nyc-total", 1000)
-	
-	initNycMap(ny, data, "Less than 5 minutes", "#svg-nyc-0", 1000)
-	initNycMap(ny, data, "90 or more minutes", "#svg-nyc-90", 1000)
+	var nycMap = initNycMap(nyc, nycdata, "median income", "#svg-nyc-income", 250000)
+	//initNycMap(nyc, nycdata, "Total", "#svg-nyc-total", 1000)	
+	//initNycMap(nyc, nycdata, "Less than 5 minutes", "#svg-nyc-0", 1000)
+	//initNycMap(nyc, nycdata, "90 or more minutes", "#svg-nyc-90", 1000)
 	
 }
 
@@ -169,7 +166,7 @@ function renderNycMap(data, column,svg,max) {
 
 	//console.log(companiesByZipcode)
 	var colorScale = function(d) {
-		var scale = d3.scale.sqrt().domain([0,max]).range(["#fff", "#a20000"]); 
+		var scale = d3.scale.sqrt().domain([1,max]).range(["#fff", "#a20000"]); 
 		var x = companiesByZipcode[d.properties.GEOID]
 		if(isNaN(x[0][column])) {
 			return scale(0)
@@ -177,26 +174,24 @@ function renderNycMap(data, column,svg,max) {
 		return scale(x[0][column])
 	}
 
-	map.attr("stroke-opacity", 0)
-		.attr("stroke","#666")
+	map.attr("stroke-opacity", 1)
+		.attr("stroke",colorScale)
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
 		
-
 		var tip = d3.tip()
 		  .attr('class', 'd3-tip-nyc')
 		  .offset([-10, 0])
 	
 		map.call(tip);
 		map.on('mouseover', function(d){
-			
 			var currentZipcode = d.properties.GEOID
 			if(table.group(data, ["Id"])[currentZipcode]){
-				tipText =currentZipcode
+				tipText = "median household income: $"+ table.group(data, ["Id"])[currentZipcode][0]["median income"]
 				tip.html(function(d){return tipText})
 				tip.show()
 			}else{
-				tip.html(function(d){return currentZipcode + ": no companies"})
+				tip.html("not in data")
 				tip.show()
 			}
 		})
