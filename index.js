@@ -18,26 +18,33 @@ var config = {
 var global = {
 	data: null,
 	nycPaths: null,
-	usMapWidth:1200,
-	usMapHeight:1200
+	usMapWidth:600,
+	usMapHeight:600
 	
 }
 $(function() {
 	queue()
 		.defer(d3.json, cityGeojson)
 		.defer(d3.csv, csv)
+		.defer(d3.json, bostonGeo)
+		.defer(d3.csv, boston)
+		.defer(d3.json, sfGeo)
+		.defer(d3.csv, sf)
+	
 		.await(dataDidLoad);
 })
 
-function dataDidLoad(error, nyc, nycdata) {
+function dataDidLoad(error, nyc, nycdata, boston, bostondata, sf, sfdata) {
 	//var nycMap = initNycMap(ny, data, column, svg, max)
+	initNycMap(nyc, nycdata, "Income", "#svg-nyc", 250000)
+	initNycMap(boston, bostondata, "Income", "#svg-boston", 250000)
+	initNycMap(sf, sfdata, "Income", "#svg-sf", 250000)
 	
-	
-	var nycMap = initNycMap(nyc, nycdata, "median income", "#svg-nyc-income", 250000)
+	//renderNycMap(bostondata,"Income","#svg-boston",250000)	
 	//initNycMap(nyc, nycdata, "Total", "#svg-nyc-total", 1000)	
 	//initNycMap(nyc, nycdata, "Less than 5 minutes", "#svg-nyc-0", 1000)
 	//initNycMap(nyc, nycdata, "90 or more minutes", "#svg-nyc-90", 1000)
-	
+	drawIncome()
 }
 
 //put currentSelection in to global
@@ -126,14 +133,33 @@ var table = {
 }
 
 
-function renderMap(data, selector,width,height) {
+function drawIncome(){
+	var key = d3.select("#filters").append("svg").attr("width",200).attr("height",200)
+	var legend = key.append("defs").append("svg:linearGradient").attr("id", "gradient").attr("x1", "100%").attr("y1", "0%").attr("x2", "100%").attr("y2", "100%").attr("spreadMethod", "pad");
+	legend.append("stop").attr("offset", "0%").attr("stop-color", "#a20000").attr("stop-opacity", 1);
+	legend.append("stop").attr("offset", "100%").attr("stop-color", "#fff").attr("stop-opacity", 1);
+	key.append("rect").attr("width", 20).attr("height",200).style("fill", "url(#gradient)").attr("transform", "translate(0,10)");
+	var y = d3.scale.sqrt().range([200, 0]).domain([1, 250000]);
+	var yAxis = d3.svg.axis().scale(y).orient("right");
+	key.append("g").attr("class", "y axis").attr("transform", "translate(41,10)").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", -15).attr("dy", ".71em").style("text-anchor", "end").text("median household income");
 
+	
+	
+	
+}
+
+function initNycMap(paths, data, column, svg, max) {
+	renderMap(paths, svg, global.usMapWidth,global.usMapHeight)
+	renderNycMap(data, column,svg,max)	
+}
+
+function renderMap(data, selector,width,height) {
 	var projection = d3.geo.mercator().scale(1).translate([0, 0])
 	var path = d3.geo.path().projection(projection);
-
 	var b = path.bounds(data)
 	var s = config.zoom / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height)
 	var t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2]
+	//console.log([b,s,t])
 
 	projection.scale(s).translate(t);
 
@@ -151,18 +177,11 @@ function renderMap(data, selector,width,height) {
 	return map
 }
 
-function initNycMap(paths, data, column, svg,max) {
-	var map = renderMap(paths, svg, global.usMapWidth,global.usMapHeight)
-//	console.log(data)
-	renderNycMap(data, column,svg,max)
-	
-}
-
 function renderNycMap(data, column,svg,max) {
 	var map = d3.select(svg).selectAll(".map-item")
 
 	var companiesByZipcode = table.group(data, ["Id"])
-//	var largest = table.maxCount(companiesByZipcode)
+	//	var largest = table.maxCount(companiesByZipcode)
 
 	//console.log(companiesByZipcode)
 	var colorScale = function(d) {
@@ -187,7 +206,7 @@ function renderNycMap(data, column,svg,max) {
 		map.on('mouseover', function(d){
 			var currentZipcode = d.properties.GEOID
 			if(table.group(data, ["Id"])[currentZipcode]){
-				tipText = "median household income: $"+ table.group(data, ["Id"])[currentZipcode][0]["median income"]
+				tipText = "median household income: $"+ table.group(data, ["Id"])[currentZipcode][0][column]
 				tip.html(function(d){return tipText})
 				tip.show()
 			}else{
