@@ -78,14 +78,17 @@ function redrawFilteredMaps(low,high){
 	d3.select(".filterHighlight").remove()
 	
 	var y = d3.scale.linear().range([0,400]).domain([0, 250000]);
-	drawFilterHighlight(y(high),y(low))
-	console.log([high,low])
-	console.log([y(high),y(low)])
+	//drawFilterHighlight(y(high),y(low))
+	//console.log([high,low])
+	//console.log([y(high),y(low)])
 	//var map = d3.select(#svg-sf).selectAll(".map-item")
 	d3.select("#svg-sf").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
 	d3.select("#svg-nyc").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
 	d3.select("#svg-boston").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
 	
+	
+	d3.select("#income-label").html("Showing locations with median household income between $"+low+" and $"+high)
+	tip.hide()
 }
 
 //put currentSelection in to global
@@ -175,28 +178,164 @@ var table = {
 
 function drawFilter(){
 	var height = 600
+	var rectHeight = height-200
 	var width = 100
-	var key = d3.select("#filters").append("svg").attr("width",width).attr("height",height)
+	var key = d3.select("#filters").append("svg").attr("width",width).attr("height",rectHeight+20)
 	var legend = key.append("defs").append("svg:linearGradient").attr("id", "gradient").attr("x1", "100%").attr("y1", "0%").attr("x2", "100%").attr("y2", "100%").attr("spreadMethod", "pad");
 	legend.append("stop").attr("offset", "0%").attr("stop-color", "#a20000").attr("stop-opacity", 1);
 	legend.append("stop").attr("offset", "100%").attr("stop-color", "#fff").attr("stop-opacity", 1);
-	key.append("rect").attr("width", width-80).attr("height",height-200).style("fill", "url(#gradient)").attr("transform", "translate(0,0)");
-	var y = d3.scale.linear().range([height-200, 0]).domain([1, 250000]);
+	key.append("rect").attr("width", width-80).attr("height",rectHeight).style("fill", "url(#gradient)").attr("transform", "translate(0,0)");
+	var y = d3.scale.linear().range([rectHeight, 0]).domain([0, 250000]);
+	var yInvert = d3.scale.linear().domain([rectHeight, 0]).range([0, 250000]);
+	
 	var yAxis = d3.svg.axis().scale(y).orient("right");
 	key.append("g").attr("class", "y axis").attr("transform", "translate(41,0)").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", -15).attr("dy", ".71em").style("text-anchor", "end").text("median household income");
-	drawFilterHighlight(height-200,0)
+	
+	
+	//drawFilterHighlight(height-200,0)
+	key.append("g")
+	
+	var slider = key.append("rect")
+		.attr("class","slider")
+		.attr("x", 0)
+		.attr("width", 20)
+		.attr("height",height-200)
+		.attr("y",0)
+		.attr("opacity",1)
+		.attr("fill","green")
+		.call(d3.behavior.drag()
+			.on("dragstart", function() {
+				d3.event.sourceEvent.stopPropagation();
+				d3.select(this).property("drag-offset-y", d3.event.sourceEvent.y - this.getBoundingClientRect().bottom)
+			})
+			.on("drag", function(d, e) {
+				var y = d3.event.y - d3.select(this).property("drag-offset-y")
+				var h = parseFloat(d3.select(this).attr("height"))
+				if(y <= 8) {
+					y = 8
+				}
+				
+				if((y + h) >= rectHeight) {
+					y = rectHeight - h
+				}
+				
+//				console.log([y,h,h+y])
+				
+				d3.select(this).attr("y", y)
+				updateHandleLocations()
+				//TODO:updateMaps()
+				var low = yInvert(bottomHandlePosition())
+				var high = yInvert(topHandlePosition())
+//				console.log([low,high])
+				redrawFilteredMaps(low,high)
+			})
+		)
+	var topHandle = key.append("rect")
+		.attr("class","handle-top")
+		.attr("x", 0)
+		.attr("width", 20)
+		.attr("height",8)
+		.attr("y",0)
+		.attr("opacity",1)
+		.attr("fill","blue")
+		.call(d3.behavior.drag()
+			.on("dragstart", function() {
+				d3.event.sourceEvent.stopPropagation();
+				d3.select(this).property("drag-offset-y", d3.event.sourceEvent.y - this.getBoundingClientRect().bottom)
+			})
+			.on("drag", function(d, e) {
+				var y = d3.event.y - d3.select(this).property("drag-offset-y")
+				var h = parseFloat(d3.select(this).attr("height"))
+				if(y <= 0) {
+					y = 0
+				}
+				if((y + h) >= height) {
+					y = height - h
+				}
+				if(y >=bottomHandlePosition()){
+					y = bottomHandlePosition()-8*2
+				}
+				d3.select(this).attr("y", y)
+				updateSliderLocation()
+				var low = yInvert(bottomHandlePosition())
+				var high = yInvert(topHandlePosition())
+//				console.log([low,high])
+				redrawFilteredMaps(low,high)
+			})
+		)
+	var bottomHandle = key.append("rect")
+		.attr("class","handle-bottom")
+		.attr("x", 0)
+		.attr("width", 20)
+		.attr("height",8)
+		.attr("y",height-200)
+		.attr("opacity",1)
+		.attr("fill","blue")
+		.call(d3.behavior.drag()
+					.on("dragstart", function() {
+						d3.event.sourceEvent.stopPropagation();
+					})
+					.on("drag", function() {
+						var y = d3.event.y - (d3.select(this).attr("height") / 2)
+
+						if(y <= topHandlePosition()) {
+							y = topHandlePosition()+8*2
+						}
+						if(y >= height-200) {
+							y = height-200
+						}
+						d3.select(this).attr("y", y)
+						updateSliderLocation()
+				var low = yInvert(bottomHandlePosition())
+				var high = yInvert(topHandlePosition())
+//				console.log([low,high])
+				redrawFilteredMaps(low,high)
+					})
+				)
+	
 }
-function drawFilterHighlight(high,low){
+
+function topHandlePosition() {
+	return parseFloat(d3.select("#filters").select(".handle-top").attr("y"))
+}
+function bottomHandlePosition() {
+	return parseFloat(d3.select("#filters").select(".handle-bottom").attr("y"))
+}
+
+function updateSliderLocation() {
+	//console.log("call slider update")
+	var startY = topHandlePosition()	
+	var endY = bottomHandlePosition()
+	var slider = d3.select("#filters").select(".slider")
+	//slider.attr("height", startY - endY)
+	slider.attr("height", endY-startY)
+	slider.attr("y", startY)
+}
+
+function updateHandleLocations() {
+	var topHandle = d3.select("#filters  .handle-top")
+	var bottomHandle = d3.select("#filters .handle-bottom")
+
+	var slider = d3.select("#filters  .slider")
+	var startX = parseFloat(slider.attr("y")) - 8
+	var endX = parseFloat(slider.attr("y")) + parseFloat(slider.attr("height"))
+//console.log([startX,endX])
+	topHandle.attr("y", startX)
+	bottomHandle.attr("y", endX)
+}
+
+/*function drawFilterHighlight(high,low){
 	d3.select("#filters svg")
 	.append("rect")
 	.attr("class","filterHighlight")
 	.attr("width", 20)
 	.attr("height",(high)-parseInt(low))
 	.attr("y",400-high)
-	.attr("stroke","red")
-	.attr("opacity",.8)
-	.attr("stroke-width",2).attr("fill","none")
-}
+	.attr("stroke","#fff")
+	.attr("opacity",.3)
+	.attr("stroke-width",4)
+	.attr("fill","#666")
+}*/
 function filterData(data,low,high){
 	//console.log(data)
 	var filteredData = table.filter(table.group(data, ["Income"]), function(list, income) {
@@ -213,9 +352,10 @@ function initNycMap(paths, data, column, svg, max) {
 	renderNycMap(data, column,svg,max)
 }
 function zoomed() {
+	console.log("zoomed")
   map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-  map.select(".state-border").style("stroke-width", 1.5 / d3.event.scale + "px");
-  map.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
+ // map.select(".state-border").style("stroke-width", 1.5 / d3.event.scale + "px");
+//  map.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
 }
 //sets scale of each initial map to fit svg
 function renderMap(data, selector,width,height) {
@@ -238,13 +378,13 @@ function renderMap(data, selector,width,height) {
 		.attr('height', width)
 		.attr('width', height);
 		
-	var map =  svg.selectAll(".map").append("g")
+	map =  svg.selectAll(".map").append("g")
 		
 	svg.append("rect")
 	    .attr("class", "overlay")
 	    .attr("width", width)
 	    .attr("height", height)
-		.attr("fill","none")
+		.attr("fill","#fff")
 	    .call(zoom);
 			
 	map.append("path")
