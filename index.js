@@ -212,7 +212,11 @@ function initNycMap(paths, data, column, svg, max) {
 	renderMap(paths, svg, global.usMapWidth,global.usMapHeight)
 	renderNycMap(data, column,svg,max)
 }
-
+function zoomed() {
+  map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  map.select(".state-border").style("stroke-width", 1.5 / d3.event.scale + "px");
+  map.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
+}
 //sets scale of each initial map to fit svg
 function renderMap(data, selector,width,height) {
 	var projection = d3.geo.mercator().scale(1).translate([0, 0])
@@ -223,14 +227,30 @@ function renderMap(data, selector,width,height) {
 	//console.log([b,s,t])
 
 	projection.scale(s).translate(t);
-
+	
+	var zoom = d3.behavior.zoom()
+	    .translate([0, 0])
+	    .scale(1)
+	    .scaleExtent([1, 8])
+	    .on("zoom", zoomed);
+		
 	var svg = d3.select(selector).append("svg")
 		.attr('height', width)
 		.attr('width', height);
-
-	var map = svg.selectAll(".map")
+		
+	var map =  svg.selectAll(".map").append("g")
+		
+	svg.append("rect")
+	    .attr("class", "overlay")
+	    .attr("width", width)
+	    .attr("height", height)
+		.attr("fill","none")
+	    .call(zoom);
+			
+	map.append("path")
 		.data(data.features)
-		.enter().append("path")
+		.enter()
+		.append("path")
 		.attr("d", path)
 		.attr("class", "map-item")
 		.attr("cursor", "pointer");
@@ -291,8 +311,7 @@ function renderNycMap(data, column,svg,max) {
 			//var low = 0
 			var low = parseInt(currentIncome*0.9)
 			d3.select("#income-label").html("You selected household income of $"+currentIncome
-			+"<br/>Showing areas with income 10% above and below selection: $"+low+" - $"+high
-			+ "<br/> and additional info  - in % of areas in each city etc")
+			+"<br/>Showing income 10% above and below selection: $"+low+" - $"+high)
 			tip.hide()
 			redrawFilteredMaps(low,high)
 		})
