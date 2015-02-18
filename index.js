@@ -56,39 +56,23 @@ function dataDidLoad(error, nyc, nycdata, boston, bostondata, sf, sfdata) {
 	//initNycMap(sf, sfdata, "Income", "#svg-sf", 250000)
 }
 
-var travelTimeColumns = {
-	"a":"0-5",
-	"b":"5-9",
-	"c":"10-14",
-	"d":"15-19",
-	"e":"20-24",
-	"f":"25-29",
-	"g":"30-34",
-	"h":"35-39",
-	"i":"40-44",
-	"j":"45-59",
-	"k":"60-89",
-	"l":"90+"
-}
-
 function drawChart(data, svg){
 	//console.log(data)
 	//console.log(sumEachColumnChartData(data,"a"))
-	var keys = ["a","b","c","d","e","f","g","h","i","j","k","l"]
+	var keys = ["0-5","5-9","1-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","60-89","90+"]
 	var max = 0
 	var chartData = {}
 	var chartDataArray = []
 	var total = 0
-	for(var key in travelTimeColumns){
-		columnSum = sumEachColumnChartData(data,key)
+	for(var key in keys){
+		columnSum = sumEachColumnChartData(data,keys[key])
 		if(columnSum>max){
 			max = columnSum
 		}
-		chartData[key]=columnSum
+		chartData[keys[key]]=columnSum
 		total += columnSum
 		chartDataArray.push(columnSum)
 	}
-	//console.log(chartData)
 	var height = 200
 	var width = 500
 	var margin = 60
@@ -120,7 +104,7 @@ function drawChart(data, svg){
 		.attr("opacity",0.6)
 		.on("mouseover",function(d){
 			var value = chartData[d]
-			var label = travelTimeColumns[d]
+			var label = d
 			var percentage = parseInt(value/total*100)
 		})
 		
@@ -130,7 +114,7 @@ function drawChart(data, svg){
 		.append("text")
 		.attr("class","chartLabel")
 		.text(function(d){
-			return travelTimeColumns[d]
+			return d
 		})
 		.attr("x",function(d,i){
 			return i*(barWidth+barGap)+margin+10
@@ -145,7 +129,7 @@ function drawChart(data, svg){
 		.attr("class","percentLabel")
 		.text(function(d){
 			var value = chartData[d]
-			var label = travelTimeColumns[d]
+			var label = d
 			var percentage = parseInt(value/total*100)
 			return percentage+"%"
 		})
