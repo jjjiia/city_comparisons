@@ -36,23 +36,24 @@
 	<div id = "income-label"></div>
 	<div id="containers">
 		<div id = "filters"></div>
-		<div id="svg-nyc">New York City</div>
-		<div id="svg-boston">Boston</div>
-		<div id="svg-sf">San Francisco</div>
+		<div id="svg-1">New York City<br/></div>
+		<div id="svg-2">Boston<br/></div>
+		<div id = "chart1">Commute Time to Work<br/></div>
+		<div id = "chart2">Commute Time to Work<br/></div>
 	</div>
 	
 	<div id = "header">
 		<div id = "title-text">
-			<div id = "title">Income Comparisons Test</div>
+			<div id = "title">Test Test Test</div>
 	  <div id = "subtitle">This map compares median household income between cities. <br/>
-Inspired by cost of living calculators online, this map get specific about income, housing, and transportation using census data. It works like a calculator by translating between city areas rather than dollar units, choose your income on the scroll bar and it will show the areas in other cities you can live in and the demographics and costs of those areas. </div>
+Inspired by cost of living calculators online, this map gets census block group level data about income, housing, and transportation. It works like a calculator by translating between city areas rather than dollar units, choose your income on the scroll bar and it will show the areas in other cities you can live in and the demographics and costs of those areas. </div>
 		</div>
 	</div>
 
 	<script type="text/javascript" charset="utf-8">
 	var csv = "ny/income_traveltime.csv"
 	var cityGeojson = "nyc.geojson"
-	var boston = "ma/income_transitTime.csv"
+	var boston = "ma/income_traveltime.csv"
 	var bostonGeo ="boston.geojson"
 	var sf = "ca/income.csv"
 	var sfGeo = "sanFrancisco.geojson"

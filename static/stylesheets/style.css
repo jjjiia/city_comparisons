@@ -1,0 +1,141 @@
+html, body{
+
+    font-family:"Baskerville"; font-weight: lighter;
+	letter-spacing:1px;
+  overflow-y: auto;
+  overflow-x: auto;
+  font-size:14px;
+  font-color:#222;
+  min-width:1000px;
+  min-height:600px;
+}
+a{
+	font-color:#000;
+}
+#header{
+	position:fixed;
+	top:0px;
+	left:0px;
+	z-index: 9999;
+	
+	min-width:900px;
+}
+#logo{
+	height: 60px;
+	width: 60px;
+	z-index: 9999;
+	margin:10px;
+	margin-top:15px;
+  	cursor:pointer;
+}
+#title-text{
+	position:fixed;
+	left:0px;
+	top:0px;
+	padding-top:5px;
+	margin-left:20px;
+	min-width:900px;
+	z-index: 9;
+	
+}
+
+
+#title{
+	padding-left:5px;
+	font-size: 46px;
+	line-height:100%;
+	margin-top:10px;
+	min-width:900px;
+	
+}
+#subtitle{
+	padding-left:5px;
+	font-size:14px;
+	width:600px;
+	margin-top:10px;
+}
+.chartLabel{
+	writing-mode: tb;
+}
+.percentLabel{
+	font-size:10px;
+	font-family:helvetica;
+	fill:#ffffff;
+}
+
+#filters {position:absolute; left:10px; top:250px; padding:40px;}
+#svg-1 {position:absolute;  left:150px; top:250px; padding:0px;}
+#svg-2 {position:absolute; left:700px; top:250px; padding:0px;}
+
+#chart1{position:absolute; left:150px; top:800px;width:500px; height:200px; padding:4px;}
+#chart2{position:absolute; left:700px; top:800px; width:500px; height:200px;padding:4px;}
+
+#income-label{position:absolute; top:220px;left:20px; font-size:14px;color:red;}
+
+.d3-tip {
+  line-height: 1;
+  padding: 4px;
+  background: #ECAB23;
+  color: #fff;
+  border-radius: 3px;
+}
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 9px;
+  width: 100%;
+  line-height: 1;
+  color: #ECAB23;
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+.d3-tip-nyc {
+  line-height: 1;
+  padding: 2px;
+  background: #ff2222;
+  color: #fff;
+  border-radius: 3px;
+}
+.d3-tip-nyc:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 9px;
+  width: 100%;
+  line-height: 1;
+  color: #ff2222;
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+.d3-tip-nyc.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+.d3-tip-world {
+  line-height: 1;
+  padding: 4px;
+  background: rgba(0,0,0,.5);
+  color: #fff;
+  border-radius: 3px;
+}
+.d3-tip-world.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+.axis text {
+	font: 10px sans-serif;
+}
+
+.axis line, .axis path {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
