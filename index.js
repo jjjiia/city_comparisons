@@ -12,12 +12,10 @@ var config = {
 }
 
 var global = {
-	nyc: null,
-	nycdata: null,
-	boston:null,
-	bostondata:null,
-	sf:null,
-	sfdata:null,
+	city1:null,
+	geojson1: null,
+	city2:null,
+	geojson2:null,
 	usMapWidth:500,
 	usMapHeight:500,
 	max:250000,
@@ -26,48 +24,46 @@ var global = {
 }
 $(function() {
 	queue()
-		.defer(d3.json, cityGeojson)
-		.defer(d3.csv, csv)
-		.defer(d3.json, bostonGeo)
-		.defer(d3.csv, boston)
-		.defer(d3.json, sfGeo)
-		.defer(d3.csv, sf)
-	
+		.defer(d3.json, geojson1)
+		.defer(d3.csv, csv1)
+		.defer(d3.json, geojson2)
+		.defer(d3.csv, csv2)
 		.await(dataDidLoad);
 })
 
-function dataDidLoad(error, nyc, nycdata, boston, bostondata, sf, sfdata) {
+function dataDidLoad(error, geojson1, city1, geojson2, city2) {
 	drawFilter()
 	
-	global.nyc = nyc
-	global.nycdata = nycdata
-	global.boston = boston
-	global.bostondata = bostondata
-	global.sf = sf
-	global.sfdata = sfdata
+	global.city1 = city1
+	global.geojson1 = geojson1
+	global.city2 = city2
+	global.geojson2 = geojson2
+
 	//call map function like this: initNycMap(path, data, column, svg, max for scale)
 //	console.log(getSizeOfObject(nycdata))
 	//var nycdata = filterData(nycdata,0,2000000000000)	
-	initNycMap(nyc, nycdata, "Income", "#svg-1",0,global.maxIncome)
-	drawChart(nycdata,"#chart1",1)
+	
+	initNycMap(geojson1, city1, "Median", "#svg-1",0,global.maxIncome)
+	drawChart(city1,"#chart1",1)
 //	var bostondata = filterData(bostondata,0,10000000)
-	initNycMap(boston, bostondata, "Income", "#svg-2",0,global.maxIncome)
-	drawChart(bostondata,"#chart2",2)
+	initNycMap(geojson2, city2, "Median", "#svg-2",0,global.maxIncome)
+	drawChart(city2,"#chart2",2)
 	
 //	var filteredSf = filterData(sfdata,0,10000000)
-	//initNycMap(sf, sfdata, "Income", "#svg-sf", 250000)
+	//initNycMap(sf, sfdata, "Median", "#svg-sf", 250000)
 }
 
 function drawChart(data, svg, svgNumber){
 	//console.log(data)
 	//console.log(sumEachColumnChartData(data,"a"))
-	var keys = ["0-5","5-9","1-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","60-89","90+"]
+	var keys = ["Less than $10,000","$10,000 to $14,999","$15,000 to $19,999","$20,000 to $24,999","$25,000 to $29,999","$30,000 to $34,999","$35,000 to $39,999","$40,000 to $44,999","$45,000 to $49,999","$50,000 to $59,999","$60,000 to $74,999","$75,000 to $99,999","$100,000 to $124,999","$125,000 to $149,999","$150,000 to $199,999","$200,000 or more"]
 	var max = 0
 	var chartData = {}
 	var chartDataArray = []
 	var total = 0
 	for(var key in keys){
 		columnSum = sumEachColumnChartData(data,keys[key])
+		
 		if(columnSum>max){
 			max = columnSum
 		}
@@ -75,6 +71,7 @@ function drawChart(data, svg, svgNumber){
 		total += columnSum
 		chartDataArray.push(columnSum)
 	}
+	
 	var height = 200
 	var width = 500
 	var margin = 60
@@ -109,9 +106,10 @@ function drawChart(data, svg, svgNumber){
 			var percentage = parseInt(value/total*100)
 		})
 		.on("click",function(d){
-		//	global.max = 800
-		//	renderNycMap(global.nycdata, d, "#svg-1",0, global.maxIncome)
-		//	renderNycMap(global.bostondata, d, "#svg-2",0, global.maxIncome)
+			//global.max = 100
+			//console.log(d)
+			//renderNycMap(global.city1, d, "#svg-1",0, global.maxIncome)
+			//renderNycMap(global.city2, d, "#svg-2",0, global.maxIncome)
 			
 		})
 		
@@ -152,7 +150,7 @@ function drawChart(data, svg, svgNumber){
 			
 	svg.append("text")
 		.attr("class","axisLabel")
-		.text("travel time in minutes")
+		.text("Income Distribution")
 		.attr("x",margin)
 		.attr("y",height)
 }
@@ -168,6 +166,7 @@ function getSizeOfObject(obj){
 
 function sumEachColumnChartData(data,column){
 	//console.log(data)
+	//console.log(data)
 	var groupLength = getSizeOfObject(data)
 	var sum = 0
 	for(var i =0; i<groupLength; i++){
@@ -179,33 +178,21 @@ function sumEachColumnChartData(data,column){
 }
 
 function redrawFilteredMaps(low,high){
-	//d3.select("#svg-1 svg").remove()
-	//d3.select("#svg-2 svg").remove()
-	//d3.select("#svg-sf svg").remove()
 	d3.select("#chart1 svg").remove()
 	d3.select("#chart2 svg").remove()
 	
-//	var nycdata = filterData(global.nycdata,low,high)
-	renderNycMap(global.nycdata, "Income", "#svg-1", low,high)
-	drawChart(global.nycdata,"#chart1",1)
-	//var bostondata = filterData(global.bostondata,low,high)
-	renderNycMap(global.bostondata, "Income", "#svg-2",low,high)
-	drawChart(global.bostondata,"#chart2",2)
-//	var filteredSf = filterData(global.sfdata,low,high)
-//	initNycMap(global.sf, filteredSf, "Income", "#svg-sf", 250000)
-//	renderNycMap(filteredSf, "Income", "#svg-sf", 250000)
+	var filtered1 = filterData(global.city1,low,high)
+	renderNycMap(global.city1, "Median", "#svg-1", low,high)
+	drawChart(filtered1,"#chart1",1)
+	
+	renderNycMap(global.city2, "Median", "#svg-2",low,high)
+	var filtered2 = filterData(global.city2,low,high)
+	drawChart(filtered2,"#chart2",2)
 	
 	d3.select(".filterHighlight").remove()
-	
+		
 	var y = d3.scale.linear().range([0,400]).domain([0,global.max]);
-	//drawFilterHighlight(y(high),y(low))
-	//console.log([high,low])
-	//console.log([y(high),y(low)])
-	//var map = d3.select(#svg-sf).selectAll(".map-item")
-//	d3.select("#svg-1").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
-//	d3.select("#svg-2").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
 	d3.select("#income-label").html("Showing locations with median household income between $"+low+" and $"+high)
-	//tip.hide()
 }
 
 //put currentSelection in to global
@@ -451,7 +438,7 @@ function updateHandleLocations() {
 }*/
 function filterData(data,low,high){
 	//console.log(data)
-	var filteredData = table.filter(table.group(data, ["Income"]), function(list, income) {
+	var filteredData = table.filter(table.group(data, ["Median"]), function(list, income) {
 		income = parseFloat(income)
 		return (income >= low && income <= high)
 	})
@@ -569,7 +556,7 @@ function renderNycMap(data, column,svg,low,high) {
 			tip.hide()
 			redrawFilteredMaps(low,high)
 			
-			var y = d3.scale.linear().range([400, 0]).domain([0, 250000]);
+			var y = d3.scale.linear().range([400, 0]).domain([0, global.max]);
 			
 			var topHandle = d3.select("#filters  .handle-top")
 			var bottomHandle = d3.select("#filters .handle-bottom")

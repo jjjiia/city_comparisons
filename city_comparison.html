@@ -33,13 +33,22 @@
 </head>
 
 <body>
-	<div id = "income-label">	<a href="javascript:redrawFilteredMaps(0,global.maxIncome)">Reset All</a></div>
+	<div id = "income-label"><a href="javascript:redrawFilteredMaps(0,global.maxIncome)">Reset All</a></div>
 	<div id="containers">
+		<div id = "pick-city">
+			<strong>compare </strong>
+			<a href="javascript:var city1 = boston">Boston</a>
+			 | <a href="javascript:var city1 = nyc">nyc</a>
+			| <a href="javascript:var city1 = sf">san francisco</a>
+			<strong>with </strong>
+			<a href="javascript:var city2 = boston">Boston</a> | <a href="javascript:var city2 = nyc">nyc</a>
+		</div>
+		
 		<div id = "filters"></div>
 		<div id="svg-1">New York City<br/></div>
 		<div id="svg-2">Boston<br/></div>
-		<div id = "chart1">Commute Time to Work<br/></div>
-		<div id = "chart2">Commute Time to Work<br/></div>
+		<div id = "chart1">Income Distribution<br/></div>
+		<div id = "chart2">Income Distribution<br/></div>
 	</div>
 	
 	<div id = "header">
@@ -51,12 +60,16 @@ Inspired by cost of living calculators online, this map gets census block group 
 	</div>
 
 	<script type="text/javascript" charset="utf-8">
-	var csv = "nyc/income_traveltime.csv"
-	var cityGeojson = "nyc.geojson"
-	var boston = "boston/income_traveltime.csv"
-	var bostonGeo ="boston.geojson"
-	var sf = "ca/income.csv"
-	var sfGeo = "sanFrancisco.geojson"
+	var boston = "boston"
+	var nyc = "nyc"
+	var sf = "sf"
+	var city1 = nyc
+	var city2 = boston
+	var csv1 = "data/"+city1+"_income.csv"
+	var geojson1 = "data/"+city1+"_bg.geojson"
+	var csv2 = "data/"+city2+"_income.csv"
+	var geojson2 = "data/"+city2+"_bg.geojson"
+
 	</script>
 	
 	  <script src="index.js"></script>
