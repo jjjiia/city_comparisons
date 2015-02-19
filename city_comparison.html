@@ -33,7 +33,7 @@
 </head>
 
 <body>
-	<div id = "income-label"></div>
+	<div id = "income-label">	<a href="javascript:redrawFilteredMaps(0,global.maxIncome)">Reset All</a></div>
 	<div id="containers">
 		<div id = "filters"></div>
 		<div id="svg-1">New York City<br/></div>
@@ -51,9 +51,9 @@ Inspired by cost of living calculators online, this map gets census block group 
 	</div>
 
 	<script type="text/javascript" charset="utf-8">
-	var csv = "ny/income_traveltime.csv"
+	var csv = "nyc/income_traveltime.csv"
 	var cityGeojson = "nyc.geojson"
-	var boston = "ma/income_traveltime.csv"
+	var boston = "boston/income_traveltime.csv"
 	var bostonGeo ="boston.geojson"
 	var sf = "ca/income.csv"
 	var sfGeo = "sanFrancisco.geojson"

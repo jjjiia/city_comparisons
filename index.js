@@ -19,7 +19,9 @@ var global = {
 	sf:null,
 	sfdata:null,
 	usMapWidth:500,
-	usMapHeight:500
+	usMapHeight:500,
+	max:250000,
+	maxIncome:999999999
 	
 }
 $(function() {
@@ -46,17 +48,17 @@ function dataDidLoad(error, nyc, nycdata, boston, bostondata, sf, sfdata) {
 	//call map function like this: initNycMap(path, data, column, svg, max for scale)
 //	console.log(getSizeOfObject(nycdata))
 	//var nycdata = filterData(nycdata,0,2000000000000)	
-	initNycMap(nyc, nycdata, "Income", "#svg-1", 250000)
-	drawChart(nycdata,"#chart1")
+	initNycMap(nyc, nycdata, "Income", "#svg-1",0,global.maxIncome)
+	drawChart(nycdata,"#chart1",1)
 //	var bostondata = filterData(bostondata,0,10000000)
-	initNycMap(boston, bostondata, "Income", "#svg-2", 250000)
-	drawChart(bostondata,"#chart2")
+	initNycMap(boston, bostondata, "Income", "#svg-2",0,global.maxIncome)
+	drawChart(bostondata,"#chart2",2)
 	
 //	var filteredSf = filterData(sfdata,0,10000000)
 	//initNycMap(sf, sfdata, "Income", "#svg-sf", 250000)
 }
 
-function drawChart(data, svg){
+function drawChart(data, svg, svgNumber){
 	//console.log(data)
 	//console.log(sumEachColumnChartData(data,"a"))
 	var keys = ["0-5","5-9","1-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","60-89","90+"]
@@ -80,8 +82,7 @@ function drawChart(data, svg){
 	var barGap = 2
 	var svg = d3.select(svg)
 		.append("svg").attr("height",height).attr("width",width)
-	
-	var yScale = d3.scale.linear().domain([0,20]).range([0,height-margin])
+	var yScale = d3.scale.linear().domain([0,20]).range([5,height-margin])
 	var chart = svg.selectAll("rect")
 		.data(keys)
 		.enter()
@@ -106,6 +107,12 @@ function drawChart(data, svg){
 			var value = chartData[d]
 			var label = d
 			var percentage = parseInt(value/total*100)
+		})
+		.on("click",function(d){
+		//	global.max = 800
+		//	renderNycMap(global.nycdata, d, "#svg-1",0, global.maxIncome)
+		//	renderNycMap(global.bostondata, d, "#svg-2",0, global.maxIncome)
+			
 		})
 		
 	svg.selectAll("text")
@@ -178,26 +185,25 @@ function redrawFilteredMaps(low,high){
 	d3.select("#chart1 svg").remove()
 	d3.select("#chart2 svg").remove()
 	
-	var nycdata = filterData(global.nycdata,low,high)
-	renderNycMap(nycdata, "Income", "#svg-1", 250000)
-	drawChart(nycdata,"#chart1")
-	var bostondata = filterData(global.bostondata,low,high)
-	renderNycMap(bostondata, "Income", "#svg-2", 250000)
-	drawChart(bostondata,"#chart2")
+//	var nycdata = filterData(global.nycdata,low,high)
+	renderNycMap(global.nycdata, "Income", "#svg-1", low,high)
+	drawChart(global.nycdata,"#chart1",1)
+	//var bostondata = filterData(global.bostondata,low,high)
+	renderNycMap(global.bostondata, "Income", "#svg-2",low,high)
+	drawChart(global.bostondata,"#chart2",2)
 //	var filteredSf = filterData(global.sfdata,low,high)
 //	initNycMap(global.sf, filteredSf, "Income", "#svg-sf", 250000)
 //	renderNycMap(filteredSf, "Income", "#svg-sf", 250000)
 	
 	d3.select(".filterHighlight").remove()
 	
-	var y = d3.scale.linear().range([0,400]).domain([0, 250000]);
+	var y = d3.scale.linear().range([0,400]).domain([0,global.max]);
 	//drawFilterHighlight(y(high),y(low))
 	//console.log([high,low])
 	//console.log([y(high),y(low)])
 	//var map = d3.select(#svg-sf).selectAll(".map-item")
-	d3.select("#svg-sf").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
-	d3.select("#svg-1").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
-	d3.select("#svg-2").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
+//	d3.select("#svg-1").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
+//	d3.select("#svg-2").selectAll(".map-item").attr("stroke-opacity", .3).attr("stroke","#999")
 	d3.select("#income-label").html("Showing locations with median household income between $"+low+" and $"+high)
 	//tip.hide()
 }
@@ -410,7 +416,6 @@ function topHandlePosition() {
 function bottomHandlePosition() {
 	return parseFloat(d3.select("#filters").select(".handle-bottom").attr("y"))
 }
-
 function updateSliderLocation() {
 	//console.log("call slider update")
 	var startY = topHandlePosition()	
@@ -420,7 +425,6 @@ function updateSliderLocation() {
 	slider.attr("height", endY-startY)
 	slider.attr("y", startY)
 }
-
 function updateHandleLocations() {
 	var topHandle = d3.select("#filters  .handle-top")
 	var bottomHandle = d3.select("#filters .handle-bottom")
@@ -454,9 +458,9 @@ function filterData(data,low,high){
 	//console.log(filteredData)
 	return filteredData
 }
-function initNycMap(paths, data, column, svg, max) {
+function initNycMap(paths, data, column, svg,low,high) {
 	renderMap(paths, svg, global.usMapWidth,global.usMapHeight)
-	renderNycMap(data, column,svg,max)
+	renderNycMap(data, column,svg,low,high)
 }
 function zoomed() {
 	console.log("zoomed")
@@ -504,7 +508,7 @@ function renderMap(data, selector,width,height) {
 
 	return map
 }
-function renderNycMap(data, column,svg,max) {
+function renderNycMap(data, column,svg,low,high) {
 	var map = d3.select(svg).selectAll(".map-item")
 
 	var companiesByZipcode = table.group(data, ["Id"])
@@ -512,13 +516,16 @@ function renderNycMap(data, column,svg,max) {
 
 	//console.log(companiesByZipcode)
 	var colorScale = function(d) {
-		var scale = d3.scale.linear().domain([1,max]).range(["#fff", "#a20000"]); 
+		var scale = d3.scale.linear().domain([1,global.max]).range(["#fff", "#a20000"]); 
 		var x = companiesByZipcode[d.properties.GEOID]
 		if(!x){
-			return scale(0)
+			return scale(1)
 		}else{
 			if(isNaN(x[0][column])) {
-				return scale(0)
+				return scale(1)
+			}
+			if(x[0][column] < low ||x[0][column] > high){
+				return "#eee"
 			}
 			return scale(x[0][column])
 		}
@@ -528,6 +535,7 @@ function renderNycMap(data, column,svg,max) {
 		.attr("stroke",colorScale)
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
+			
 		
 		var tip = d3.tip()
 		  .attr('class', 'd3-tip-nyc')
