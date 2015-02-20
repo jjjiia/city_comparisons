@@ -19,7 +19,9 @@ var global = {
 	usMapWidth:500,
 	usMapHeight:500,
 	max:250000,
-	maxIncome:999999999
+	maxIncome:999999999,
+	gradientStart:"#ffffff",
+	gradientEnd:"#3CA733"
 	
 }
 $(function() {
@@ -72,30 +74,30 @@ function drawChart(data, svg, svgNumber){
 		chartDataArray.push(columnSum)
 	}
 	
-	var height = 200
+	var height = 280
 	var width = 500
-	var margin = 60
-	var barWidth = 30
+	var margin = 150
+	var barWidth = 25
 	var barGap = 2
 	var svg = d3.select(svg)
 		.append("svg").attr("height",height).attr("width",width)
-	var yScale = d3.scale.linear().domain([0,20]).range([5,height-margin])
+	var yScale = d3.scale.linear().domain([0,max/total*100.0]).range([5,height-margin])
 	var chart = svg.selectAll("rect")
 		.data(keys)
 		.enter()
 		.append("rect")
 		.attr("x",function(d,i){
-			return i*(barWidth+barGap)+margin
+			return i*(barWidth+barGap)+20
 		})
 		.attr("y",function(d){
 			var value = chartData[d]
-			var percentage = parseInt(value/total*100)
+			var percentage = parseInt(value/total*100.0)
 			return height-yScale(percentage)-margin
 		})
 		.attr("width",barWidth)
 		.attr("height",function(d){
 			var value = chartData[d]
-			var percentage = parseInt(value/total*100)
+			var percentage = parseInt(value/total*100.0)
 			return yScale(percentage)
 		})
 		.attr("fill","#000")
@@ -103,14 +105,13 @@ function drawChart(data, svg, svgNumber){
 		.on("mouseover",function(d){
 			var value = chartData[d]
 			var label = d
-			var percentage = parseInt(value/total*100)
+			var percentage = parseInt(value/total*100.0)
 		})
 		.on("click",function(d){
 			//global.max = 100
 			//console.log(d)
 			//renderNycMap(global.city1, d, "#svg-1",0, global.maxIncome)
 			//renderNycMap(global.city2, d, "#svg-2",0, global.maxIncome)
-			
 		})
 		
 	svg.selectAll("text")
@@ -122,7 +123,7 @@ function drawChart(data, svg, svgNumber){
 			return d
 		})
 		.attr("x",function(d,i){
-			return i*(barWidth+barGap)+margin+10
+			return i*(barWidth+barGap)+20+10
 		})
 		.attr("y",height-margin+5)
 		.attr("text-anchor","start")
@@ -139,14 +140,14 @@ function drawChart(data, svg, svgNumber){
 			return percentage+"%"
 		})
 		.attr("x",function(d,i){
-			return i*(barWidth+barGap)+margin+3
+			return i*(barWidth+barGap)+20+2
 		})
 		.attr("y",function(d,i){
 			var value = chartData[d]
 			var percentage = parseInt(value/total*100)
 			return height-yScale(percentage)-margin+10
 		})
-		.attr("text-anchor","start")
+		.attr("text-anchor","center")
 			
 	svg.append("text")
 		.attr("class","axisLabel")
@@ -286,8 +287,8 @@ function drawFilter(){
 	var width = 100
 	var key = d3.select("#filters").append("svg").attr("width",width).attr("height",rectHeight+20)
 	var legend = key.append("defs").append("svg:linearGradient").attr("id", "gradient").attr("x1", "100%").attr("y1", "0%").attr("x2", "100%").attr("y2", "100%").attr("spreadMethod", "pad");
-	legend.append("stop").attr("offset", "0%").attr("stop-color", "#a20000").attr("stop-opacity", 1);
-	legend.append("stop").attr("offset", "100%").attr("stop-color", "#fff").attr("stop-opacity", 1);
+	legend.append("stop").attr("offset", "0%").attr("stop-color",  global.gradientEnd).attr("stop-opacity", 1);
+	legend.append("stop").attr("offset", "100%").attr("stop-color", global.gradientStart).attr("stop-opacity", 1);
 	key.append("rect").attr("width", width-80).attr("height",rectHeight).style("fill", "url(#gradient)").attr("transform", "translate(0,0)");
 	var y = d3.scale.linear().range([rectHeight, 0]).domain([0, 250000]);
 	var yInvert = d3.scale.linear().domain([rectHeight, 0]).range([0, 250000]);
@@ -503,7 +504,7 @@ function renderNycMap(data, column,svg,low,high) {
 
 	//console.log(companiesByZipcode)
 	var colorScale = function(d) {
-		var scale = d3.scale.linear().domain([1,global.max]).range(["#fff", "#a20000"]); 
+		var scale = d3.scale.linear().domain([1,global.max]).range([global.gradientStart, global.gradientEnd]); 
 		var x = companiesByZipcode[d.properties.GEOID]
 		if(!x){
 			return scale(1)
@@ -533,6 +534,9 @@ function renderNycMap(data, column,svg,low,high) {
 			var currentZipcode = d.properties.GEOID
 			var currentIncome = table.group(data, ["Id"])[currentZipcode][0][column]
 			if(table.group(data, ["Id"])[currentZipcode]){
+				if(isNaN(currentIncome)){
+					currentIncome = "NA"
+				}
 				tipText = "median household income: $"+ currentIncome
 				tip.html(function(d){return tipText})
 				tip.show()
@@ -547,22 +551,34 @@ function renderNycMap(data, column,svg,low,high) {
 		})
 		.on("click",function(d){
 			var currentZipcode = d.properties.GEOID
-			var currentIncome = table.group(data, ["Id"])[currentZipcode][0][column]			
-			var high = parseInt(currentIncome*1.1)
-			//var low = 0
-			var low = parseInt(currentIncome*0.9)
-			d3.select("#income-label").html("You selected household income of $"+currentIncome
-			+"<br/>Showing income 10% above and below selection: $"+low+" - $"+high)
-			tip.hide()
-			redrawFilteredMaps(low,high)
+			var currentIncome = table.group(data, ["Id"])[currentZipcode][0][column]
 			
-			var y = d3.scale.linear().range([400, 0]).domain([0, global.max]);
+			if(!isNaN(currentIncome)){
+				
+				var high = parseInt(currentIncome*1.1)
+				var low = parseInt(currentIncome*0.9)
+				d3.select("#income-label").html("You selected household income of $"+currentIncome
+				+"<br/>Showing income 10% above and below selection: $"+low+" - $"+high)
+				tip.hide()
+				redrawFilteredMaps(low,high)
+				var y = d3.scale.linear().range([400, 0]).domain([0, global.max]);
 			
-			var topHandle = d3.select("#filters  .handle-top")
-			var bottomHandle = d3.select("#filters .handle-bottom")
-			topHandle.attr("y", y(high))
-			bottomHandle.attr("y",y(low))
-			updateSliderLocation()
+				var topHandle = d3.select("#filters  .handle-top")
+				var bottomHandle = d3.select("#filters .handle-bottom")
+				topHandle.attr("y", y(high))
+				bottomHandle.attr("y",y(low))
+				updateSliderLocation()
+			}			
+			
 		})
 	return map
+}
+function resetFilter(){
+	var y = d3.scale.linear().range([400, 0]).domain([0, global.max]);
+	
+	var topHandle = d3.select("#filters  .handle-top")
+	var bottomHandle = d3.select("#filters .handle-bottom")
+	topHandle.attr("y", y(global.maxIncome))
+	bottomHandle.attr("y",y(0))
+	updateSliderLocation()
 }

@@ -33,29 +33,37 @@
 </head>
 
 <body>
-	<div id = "income-label"><a href="javascript:redrawFilteredMaps(0,global.maxIncome)">Reset All</a></div>
+	<div id = "reset-all"><a href="javascript:redrawFilteredMaps(0,global.maxIncome); resetFilter()">Reset All</a></div>
+	<div id = "income-label"></div>
 	<div id="containers">
-		<div id = "pick-city">
-			<strong>compare </strong>
+		<div id = "pick-city">TODO: Dropdown for city selections
+			"<strong>compare </strong>
 			<a href="javascript:var city1 = boston">Boston</a>
 			 | <a href="javascript:var city1 = nyc">nyc</a>
 			| <a href="javascript:var city1 = sf">san francisco</a>
 			<strong>with </strong>
-			<a href="javascript:var city2 = boston">Boston</a> | <a href="javascript:var city2 = nyc">nyc</a>
+			<a href="javascript:var city2 = boston">Boston</a> | <a href="javascript:var city2 = nyc">nyc</a>"
 		</div>
 		
 		<div id = "filters"></div>
-		<div id="svg-1">New York City<br/></div>
-		<div id="svg-2">Boston<br/></div>
-		<div id = "chart1">Income Distribution<br/></div>
-		<div id = "chart2">Income Distribution<br/></div>
+		
+		<div id="svg-1"></div>
+		<div id="svg-2"></div>
+
+		<div id="svg-1-label"></div>
+		<div id="svg-2-label"></div>
+		
+		<div id = "chart1"></div>
+		<div id = "chart2"></div>
 	</div>
 	
 	<div id = "header">
 		<div id = "title-text">
 			<div id = "title">Test Test Test</div>
-	  <div id = "subtitle">This map compares median household income between cities. <br/>
-Inspired by cost of living calculators online, this map gets census block group level data about income, housing, and transportation. It works like a calculator by translating between city areas rather than dollar units, choose your income on the scroll bar and it will show the areas in other cities you can live in and the demographics and costs of those areas. </div>
+	  <div id = "subtitle"><strong>This map compares median household income and income distribution between any pair of cities.</strong> <br/>
+		  TODO: Essay<br/>
+Inspired by cost of living calculators online, this map visualizes census block group level data about median income and income diversity.
+Choose your income by clicking on any area on the maps and it will show the areas in other cities you can live in and the demographics and costs of those areas. </div>
 		</div>
 	</div>
 
@@ -69,7 +77,9 @@ Inspired by cost of living calculators online, this map gets census block group 
 	var geojson1 = "data/"+city1+"_bg.geojson"
 	var csv2 = "data/"+city2+"_income.csv"
 	var geojson2 = "data/"+city2+"_bg.geojson"
-
+	d3.select("#svg-1-label").html(city1)
+	d3.select("#svg-2-label").html(city2)
+	
 	</script>
 	
 	  <script src="index.js"></script>
