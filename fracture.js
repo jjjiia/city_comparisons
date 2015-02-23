@@ -22,7 +22,7 @@ var global = {
 	maxIncome:999999999,
 	gradientStart:"#fff",
 	gradientEnd:"#eee",
-	scale:70000,
+	scale:150000,
 	center:[-74.15, 40.9]
 	
 }
@@ -266,10 +266,10 @@ function drawDifferences(data,svg,overlapData){
 	
 	var differenceMap = d3.select("#svg-1 svg")
 	var dataById = table.group(data, ["Id"])
-	var minDifference =25000
-	var colorScale = d3.scale.linear().domain([0,200000]).range(["#000","red"])
+	var minDifference =20000
+	var colorScale = d3.scale.linear().domain([0,200000]).range(["#aaa","red"])
 	//console.log(dataById["360010131001"][0]["Median"])
-	var differenceScale = d3.scale.linear().domain([0,200000]).range([.5,1])
+	var differenceScale = d3.scale.linear().domain([0,200000]).range([.5,3])
 	var differenceOpacityScale = d3.scale.linear().domain([0,200000]).range([0,1])
 	
 	differenceMap.selectAll("circle")
@@ -295,11 +295,12 @@ function drawDifferences(data,svg,overlapData){
 			var income1 = parseInt(dataById[id1][0]["Median"])
 			var income2 = parseInt(dataById[id2][0]["Median"])
 			var difference = Math.abs(income1-income2)
-			if(isNaN(difference) || difference < minDifference || isNaN(income1) || isNaN(income2)){
-				return 0
+			if(isNaN(difference) || difference < minDifference || isNaN(dataById[id1][0]["Median"]) || isNaN(dataById[id2][0]["Median"])){
+				return .5
 			}else{
 				return differenceScale(difference)
 			}
+			return differenceScale(difference)
 		})
 		.attr("opacity",1)
 		.attr("fill",function(d){
@@ -308,6 +309,10 @@ function drawDifferences(data,svg,overlapData){
 			var income1 = parseInt(dataById[id1][0]["Median"])
 			var income2 = parseInt(dataById[id2][0]["Median"])
 			var difference = Math.abs(income1-income2)
+			var minDifference = Math.min(income1*.1, income2*.1)
+			if(isNaN(difference) || difference < minDifference || isNaN(income1) || isNaN(income2)){
+				return "#eee"
+			}
 			return colorScale(difference)
 		})
 		.on("mouseover",function(d){
@@ -556,7 +561,7 @@ function renderNycMap(data, column,svg,low,high) {
 	}
 
 	map.attr("stroke-opacity", 1)
-		.attr("stroke",colorScale)
+		.attr("stroke","#eee")
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
 			
