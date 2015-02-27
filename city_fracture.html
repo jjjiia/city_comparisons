@@ -41,16 +41,22 @@
 		<div id = "filters"></div>
 		
 		<div id="svg-1"></div>
+		<div id = "svg-2">
+			<strong>Line Chart of Adjacent Median Incomes</strong>
+			<br/>
+			The value/livability/etc as well as the potential for growth of a place is dependent 
+			on the wellbeing and qualities its surroundings/neighbors just as humans are. 
+		</div>
 		<div id="svg-1-label"></div>
 		<div id = "chart1"></div>
 	</div>
 	
 	<div id = "header">
 		<div id = "title-text">
-			<div id = "title">Inequality fractures the city</div>
-	  <div id = "subtitle">This map visualizes the boundaries inside new york city formed by income inequality<br/>
-		  TODO: Essay<br/>
-		  This map visualizes differences in household median income, and draws a line between census block groups where the difference in income is greater than $25,000.<br/>
+			<div id = "title">Inequality Fractures the City</div>
+	  <div id = "subtitle">This map draws boundaries formed by income inequality inside New York City <br/>
+		  <br/>
+		  This map visualizes differences in household median income, and draws a line between census block groups and tracts where the difference in income is greater than $25,000.<br/>
 		  Boundaries are constantly being drawn across our cities, both visible fences  or highways and invisible ones that describe the educational, financial and demographic makeup of our city. 
 </div>
 		</div>
@@ -60,11 +66,12 @@
 
 	var csv1 = "data/nyc_income.csv"
 	var geojson1 = "data/nyc_bg.geojson"
-	var overlap = "data/overlapped_coordinates.csv"
-	
+	var overlap = "data/eggs.csv"
+	var boroughs = "data/nyc-borough-boundaries-polygon.geojson"
+	var neighbors = "data/geoid_neighbor_hash.json"
 	</script>
 	
-	  <script src="fracture.js"></script>
+	  <script src="fracture_segments.js"></script>
 
     </body>
 </html>
