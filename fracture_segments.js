@@ -14,14 +14,14 @@ var global = {
 	geojson1: null,
 	city2:null,
 	geojson2:null,
-	usMapWidth:800,
-	usMapHeight:800,
+	usMapWidth:900,
+	usMapHeight:1400,
 	max:200000,
 	maxIncome:999999999,
 	gradientStart:"#fff",
 	gradientEnd:"#ddd",
 	scale:77000,
-	center:[-73.9, 40.8],
+	center:[-74.1, 40.8],
 	neighbors:null
 	
 }
@@ -146,7 +146,7 @@ function sortObjectByValue(toSort){
 function zoomed() {
 	console.log("calling zoomed" + d3.event.scale + ", translate: "+ d3.event.translate )
 	map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-  //	map.select(".map-item").style("stroke-width", 1.5 / d3.event.scale + "px");
+  	map.select(".map-item").style("stroke-width", 1.5 / d3.event.scale + "px");
 //  features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
 }
 
@@ -176,7 +176,7 @@ function renderBoroughs(data,svg,width,height){
 function drawDifferences(data,svg,overlapData){
 	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
 	
-	var differenceMap = d3.select("#svg-1 svg").append("g")
+	var differenceMap = d3.select("#svg-1 svg g")
 	var dataById = table.group(data, ["Id"])
 	var minDifference = 10000
 	var colorScale = d3.scale.linear().domain([0,200000]).range(["#aaa","red"])
@@ -257,7 +257,8 @@ function drawDifferences(data,svg,overlapData){
 			return colorScale(difference)
 		})
 		.attr("fill","none")
-		
+		.attr("stroke-linecap","round")
+		.call(zoom)
 		//.on("mouseover",function(d){
 		//	var id1 = d["id1"]
 		//	var id2 = d["id2"]
@@ -346,14 +347,17 @@ function renderNycMap(data, column,svg,low,high) {
 					
 				}
 				else{
-				tipText = "median household income: $"+ currentIncome
+				tipText = "median household income:$"+ currentIncome + "<br/>TODO:address"
+				var test = "test"
 				tip.html(function(d){return tipText})
 				tip.show()
+				d3.select("#current-details").html("TODO:Additional Info <br/>Selected Census Block Group $"+currentIncome)
 				drawNeighborsGraph(companiesByZipcode, currentZipcode)
 				}
 			}
 		})
 		.on('mouseout', function(d){
+			d3.select("#current-details").html("")
 			tip.hide()
 		})
 		//.on("click",function(d){
@@ -382,16 +386,18 @@ function renderNycMap(data, column,svg,low,high) {
 }
 function drawNeighborsGraph(data, id){
 	d3.selectAll("#svg-2 svg").remove()
+	var height = 140
+	var width = 400
 	var chart = d3.selectAll("#svg-2")
 			.append("svg")
-			.attr("width",400)
-			.attr("height",300)
+			.attr("width",width)
+			.attr("height",height)
 			.append("g")
 			.attr("transform","translate(80,20)")
-	
+	var margin = 80
 	var neighborsMedians = []
-	var incomeScale = d3.scale.linear().domain([0,250000]).range([0,200])
-	var incomeScaleReverse = d3.scale.linear().domain([0,250000]).range([200,0])
+	var incomeScale = d3.scale.linear().domain([0,250000]).range([0,height-margin])
+	var incomeScaleReverse = d3.scale.linear().domain([0,250000]).range([height-margin,0])
 	
 	var selectedIdMedian = parseInt(data[id][0]["Median"])
 	neighborsMedians.push({"id":id,"Median": selectedIdMedian})
@@ -418,7 +424,7 @@ function drawNeighborsGraph(data, id){
 			return i*12+10
 		})
 		.attr("y", function(d){
-			return 200-incomeScale(d.Median)
+			return height-margin-incomeScale(d.Median)
 		})
 		.attr("width", 10)
 		.attr("height", function(d){
