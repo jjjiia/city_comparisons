@@ -143,10 +143,40 @@ function sortObjectByValue(toSort){
 	var sorted = toSort.sort(function(a,b){return a["Median"]-b["Median"]})
 	return sorted
 }
+function zoomed() {
+	console.log("calling zoomed" + d3.event.scale + ", translate: "+ d3.event.translate )
+	map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  //	map.select(".map-item").style("stroke-width", 1.5 / d3.event.scale + "px");
+//  features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
+}
+
+function initNycMap(paths, data, column, svg,low,high,boroughs,neighbors,overlap) {
+	renderMap(paths,svg, global.usMapWidth,global.usMapHeight)
+	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
+	renderNycMap(data,column,svg,low,high)
+	drawDifferences(data,svg,overlap)
+	
+}
+function renderBoroughs(data,svg,width,height){
+	var boroughs = d3.select("#svg-1 svg")
+	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
+	var path = d3.geo.path().projection(projection);
+	//console.log(data)
+	boroughs.selectAll(".boroughs")
+		.data(data.features)
+		.enter()
+		.append("path")
+		.attr("d", path)
+		.attr("class", "boroughs")
+		.attr("cursor", "pointer")
+		.attr("stroke","#eee")
+		.attr("fill","#eee")
+		.attr("stroke-width",.5)
+}
 function drawDifferences(data,svg,overlapData){
 	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
 	
-	var differenceMap = d3.select("#svg-1 svg")
+	var differenceMap = d3.select("#svg-1 svg").append("g")
 	var dataById = table.group(data, ["Id"])
 	var minDifference = 10000
 	var colorScale = d3.scale.linear().domain([0,200000]).range(["#aaa","red"])
@@ -155,14 +185,20 @@ function drawDifferences(data,svg,overlapData){
 	var differenceOpacityScale = d3.scale.linear().domain([0,200000]).range([0,1])
 
 	var line = d3.svg.line()
-
+	var path = d3.geo.path().projection(projection);
 	
-	differenceMap.selectAll(".difference")
+	var zoom = d3.behavior.zoom()
+	    .translate([0, 0])
+	    .scale(1)
+	    .scaleExtent([1, 8])
+	    .on("zoom", zoomed);	
+	
+	differenceMap.selectAll(".map")
 		.data(overlapData)
 		.enter()
 		.append("line")
-		.attr("class","difference")
-		.attr("x1", function(d,i){
+		.attr("class","map")
+		.attr("x1", function(d){
 			//console.log(d)
 			//return 5
 			var lng1 = d["lng1"]
@@ -221,6 +257,7 @@ function drawDifferences(data,svg,overlapData){
 			return colorScale(difference)
 		})
 		.attr("fill","none")
+		
 		//.on("mouseover",function(d){
 		//	var id1 = d["id1"]
 		//	var id2 = d["id2"]
@@ -230,39 +267,11 @@ function drawDifferences(data,svg,overlapData){
 		//	console.log(difference)
 		//})
 }
-function zoomed() {
-	console.log("calling zoomed")
-  d3.selectAll("svg-1 svg path").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-//  features.select("#svg-1 svg").style("stroke-width", 1.5 / d3.event.scale + "px");
-//  features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
-}
 
-function initNycMap(paths, data, column, svg,low,high,boroughs,neighbors,overlap) {
-	renderMap(paths,svg, global.usMapWidth,global.usMapHeight)
-	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
-	renderNycMap(data,column,svg,low,high)
-	drawDifferences(data,svg,overlap)
-	
-}
-function renderBoroughs(data,svg,width,height){
-	var boroughs = d3.select("#svg-1 svg")
-	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
-	var path = d3.geo.path().projection(projection);
-	//console.log(data)
-	boroughs.selectAll(".boroughs")
-		.data(data.features)
-		.enter()
-		.append("path")
-		.attr("d", path)
-		.attr("class", "boroughs")
-		.attr("cursor", "pointer")
-		.attr("stroke","#eee")
-		.attr("fill","#eee")
-		.attr("stroke-width",.5)
-}
 function renderMap(data, selector,width,height) {
 	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
 	var path = d3.geo.path().projection(projection);
+	
 	var zoom = d3.behavior.zoom()
 	    .translate([0, 0])
 	    .scale(1)
@@ -273,17 +282,15 @@ function renderMap(data, selector,width,height) {
 		.attr('height', width)
 		.attr('width', height);
 		
-	map =  svg.selectAll(".map").append("g")
+	map =  svg.append("g")
 		
-	svg.append("rect")
-	    .attr("class", "overlay")
-	    .attr("width", width)
-	    .attr("height", height)
-		.attr("fill","#fff")
-	  
-	var features = svg.append("g")
+//	map.append("rect")
+//	    .attr("class", "overlay")
+//	    .attr("width", width)
+//	    .attr("height", height)
+//	 	.call(zoom);
 				
-	map.append("path")
+	map.selectAll(".map").append("path")
 		.data(data.features)
 		.enter()
 		.append("path")
@@ -292,7 +299,7 @@ function renderMap(data, selector,width,height) {
 		.attr("cursor", "pointer")
 		.attr("fill","#fff")
 	    .call(zoom);
-	//return map
+	return map
 }
 function renderNycMap(data, column,svg,low,high) {
 	var map = d3.select(svg).selectAll(".map-item")
