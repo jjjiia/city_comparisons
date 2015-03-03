@@ -34,19 +34,20 @@ $(function() {
 		.defer(d3.json,neighbors)
 		.await(dataDidLoad);
 })
+
 $("#topDifferences .hideTop").hide()
 
 function dataDidLoad(error, geojson1, city1, overlap, boroughs, neighbors) {
 	global.neighbors = neighbors
 	global.city1 = city1
 	global.geojson1 = geojson1
+	window.location.hash = JSON.stringify([global.translate, global.translateScale])
+
 	initNycMap(geojson1, city1, "Median", "#svg-1",0,global.maxIncome*100000,boroughs,neighbors,overlap)
 	$("#topDifferences .showTop").click(hideTop)
 	$("#topDifferences .hideTop").click(showTop)
 	d3.selectAll("#svg-1 svg g .topDifferences").attr("opacity",0)
 	drawScale()
-	window.location.hash = JSON.stringify([global.translate, global.scale])
-	
 }
 function hideTop(){
 	//console.log("show graph")
@@ -171,16 +172,18 @@ function zoomed() {
 }
 function initNycMap(paths, data, column, svg,low,high,boroughs,neighbors,overlap) {
 	renderMap(paths,svg, global.usMapWidth,global.usMapHeight)
+	renderNycMap(data,column,svg,low,high)
+	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
+	drawDifferences(data,svg,overlap)
+	var differenceData = formatDifferenceData(data,svg,overlap)
+	drawTopDifferences(differenceData)
+		
 	var parsedTranslate = JSON.parse(window.location.hash.substring(1))[0]
 	var parsedScale = JSON.parse(window.location.hash.substring(1))[1]
 	global.translate = parsedTranslate
 	global.translateScale = parsedScale
 	map.attr("transform", "translate(" + global.translate + ")scale(" + global.translateScale + ")");
-	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
-	renderNycMap(data,column,svg,low,high)
-	drawDifferences(data,svg,overlap)
-	var differenceData = formatDifferenceData(data,svg,overlap)
-	drawTopDifferences(differenceData)
+
 }
 function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
   var R = 6371; // Radius of the earth in km
@@ -411,8 +414,8 @@ function renderMap(data, selector,width,height) {
 	    .on("zoom", zoomed);
 		
 	var svg = d3.select(selector).append("svg")
-		.attr('height', width)
-		.attr('width', height);
+		.attr('height', height)
+		.attr('width', width);
 		
 	map =  svg.append("g")
 		
@@ -490,7 +493,7 @@ function renderNycMap(data, column,svg,low,high) {
 					d3.selectAll("#svg-2 svg").remove()
 				}
 				else{
-				tipText = "median household income:$"+ currentIncome
+				tipText = "block group: "+currentZipcode+"<br/>median household income:$"+ currentIncome
 				var test = "test"
 				tip.html(function(d){return tipText})
 				tip.show()
