@@ -8,14 +8,13 @@ var config = {
 		xScale: d3.scale.linear().domain([1880,2014]).range([20, 950])
 	}
 }
-
 var global = {
 	city1:null,
 	geojson1: null,
 	city2:null,
 	geojson2:null,
 	usMapWidth:900,
-	usMapHeight:1400,
+	usMapHeight:1200,
 	max:200000,
 	maxIncome:999999999,
 	gradientStart:"#fff",
@@ -34,19 +33,17 @@ $(function() {
 		.defer(d3.json,neighbors)
 		.await(dataDidLoad);
 })
+$("#topDifferences .hideTop").hide()
 
 function dataDidLoad(error, geojson1, city1, overlap, boroughs, neighbors) {
 	global.neighbors = neighbors
 	global.city1 = city1
 	global.geojson1 = geojson1
 	initNycMap(geojson1, city1, "Median", "#svg-1",0,global.maxIncome*100000,boroughs,neighbors,overlap)
-	//drawChart(city1,"#chart1",1)
-	$("#topDifferences .hideTop").hide()
-	
 	$("#topDifferences .showTop").click(hideTop)
 	$("#topDifferences .hideTop").click(showTop)
 	d3.selectAll("#svg-1 svg g .topDifferences").attr("opacity",0)
-	
+	drawScale()
 }
 function hideTop(){
 	//console.log("show graph")
@@ -165,9 +162,10 @@ function zoomed() {
 	//console.log("calling zoomed" + d3.event.scale + ", translate: "+ d3.event.translate )
 	map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
   	map.select(".map-item").style("stroke-width", 1.5 / d3.event.scale + "px");
+	var newScaleDistance = Math.round((5/d3.event.scale)* 100) / 100
+	d3.select("#scale .scale-text").text(newScaleDistance+"km")
 //  features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
 }
-
 function initNycMap(paths, data, column, svg,low,high,boroughs,neighbors,overlap) {
 	renderMap(paths,svg, global.usMapWidth,global.usMapHeight)
 	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
@@ -299,6 +297,47 @@ function drawDifferences(data,svg,overlapData){
 function isInArray(value, array) {
   return array.indexOf(value) > -1;
 }
+function calculateScaleSize(){
+	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
+	var lat1 = global.center[1]
+	var lng1 = global.center[0]
+	var lat2 = lat1+0.1
+	var lng2 = global.center[0]+0.1
+	var distance = getDistanceFromLatLonInKm(lat1,lng1,lat2,lng2)
+	//console.log(distance+"km")
+	var x1 = projection([lng1,lat1])[0]
+	var y1 = projection([lng1,lat1])[1]
+	var x2 = projection([lng2,lat2])[0]
+	var y2 = projection([lng2,lat2])[1]
+	var screenDistance = Math.sqrt(Math.pow(Math.abs(x2-x1),2)+Math.pow(Math.abs(y2-y1),2))
+//	console.log([x1,x2,y1,y2,screenDistance])
+	
+	var screenDistance1km = screenDistance/distance
+	var screenDistance100km = screenDistance1km*100
+	//console.log(screenDistance1km)
+	return screenDistance1km
+}
+
+function drawScale(){
+	var kmInPixels = calculateScaleSize()
+//	console.log(kmInPixels)
+	var scale = d3.select("#scale")
+			.append("svg")
+			.attr("width",kmInPixels*6)
+			.attr("height",50)
+		scale.append("rect")
+			.attr("class","scale")
+			.attr("x",20)
+			.attr("y",20)
+			.attr("width",kmInPixels*5)
+			.attr("height",2)
+			.attr("fill","#000")
+		scale.append("text")
+			.attr("class","scale-text")
+			.text("5 km")
+			.attr("x",20)
+			.attr("y",35)
+}
 function drawTopDifferences(data){
 	var topFive = data.splice(0,35)
 	var centroids = []
@@ -309,9 +348,7 @@ function drawTopDifferences(data){
 		var centerLat = (parseFloat(topFive[i]["lat1"]) + parseFloat(topFive[i]["lat2"]))/2
 		var centerLng = (parseFloat(topFive[i]["lng1"]) + parseFloat(topFive[i]["lng2"]))/2
 		//console.log([centerLat,centerLng])
-		if(isInArray(topFive[i]["difference"], differences)){
-			console.log("same")
-		}else{
+		if(!isInArray(topFive[i]["difference"], differences)){
 			centroids.push({lat:centerLat,lng:centerLng,difference:topFive[i]["difference"],distance:distance})
 			differences.push(topFive[i]["difference"])
 		}
@@ -354,7 +391,6 @@ function drawTopDifferences(data){
 		})
 		.attr("font-size","10")
 }
-
 function renderMap(data, selector,width,height) {
 	var projection = d3.geo.mercator().scale(global.scale).center(global.center)
 	var path = d3.geo.path().projection(projection);
@@ -405,10 +441,8 @@ function formatDifferenceData(data,svg,overlapData){
 }
 function renderNycMap(data, column,svg,low,high) {
 	var map = d3.select(svg).selectAll(".map-item")
-
 	var companiesByZipcode = table.group(data, ["Id"])
 	//	var largest = table.maxCount(companiesByZipcode)
-
 	//console.log(companiesByZipcode)
 	var colorScale = function(d) {
 		var scale = d3.scale.linear().domain([1,global.max]).range([global.gradientStart, global.gradientEnd]); 
@@ -445,14 +479,13 @@ function renderNycMap(data, column,svg,low,high) {
 				if(isNaN(currentIncome)){
 					tipText = "no data"
 					d3.selectAll("#svg-2 svg").remove()
-					
 				}
 				else{
 				tipText = "median household income:$"+ currentIncome
 				var test = "test"
 				tip.html(function(d){return tipText})
 				tip.show()
-				d3.select("#current-details").html("Census block group "+currentZipcode+" has median household income of $"+currentIncome)
+				d3.select("#current-details").html("Adjacent Median Incomes</br> Census block group "+currentZipcode+" has median household income of $"+currentIncome)
 				drawNeighborsGraph(companiesByZipcode, currentZipcode)
 				}
 			}
@@ -460,29 +493,8 @@ function renderNycMap(data, column,svg,low,high) {
 		.on('mouseout', function(d){
 			d3.select("#current-details").html("")
 			tip.hide()
+			d3.selectAll("#svg-2 svg").remove()
 		})
-		//.on("click",function(d){
-		//	var currentZipcode = d.properties.GEOID
-		//	var currentIncome = table.group(data, ["Id"])[currentZipcode][0][column]
-		//	
-		//	if(!isNaN(currentIncome)){
-		//		
-		//		var high = parseInt(currentIncome*1.1)
-		//		var low = parseInt(currentIncome*0.9)
-		//		d3.select("#income-label").html("You selected household income of $"+currentIncome
-		//		+"<br/>Showing income 10% above and below selection: $"+low+" - $"+high)
-		//		tip.hide()
-		//		redrawFilteredMaps(low,high)
-		//		var y = d3.scale.linear().range([400, 0]).domain([0, global.max]);
-		//	
-		//		var topHandle = d3.select("#filters  .handle-top")
-		//		var bottomHandle = d3.select("#filters .handle-bottom")
-		//		topHandle.attr("y", y(high))
-		//		bottomHandle.attr("y",y(low))
-		//		updateSliderLocation()
-		//	}			
-		//	
-		//})
 	return map
 }
 function drawNeighborsGraph(data, id){
@@ -539,4 +551,16 @@ function drawNeighborsGraph(data, id){
 			}
 		})
 	chart.append("g").attr("class", "y axis").call(yAxis)
+}
+function showHide(shID) {
+   if (document.getElementById(shID)) {
+      if (document.getElementById(shID+'-show').style.display != 'none') {
+         document.getElementById(shID+'-show').style.display = 'none';
+         document.getElementById(shID).style.display = 'block';
+      }
+      else {
+         document.getElementById(shID+'-show').style.display = 'inline';
+         document.getElementById(shID).style.display = 'none';
+      }
+   }
 }

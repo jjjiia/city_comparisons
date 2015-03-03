@@ -40,39 +40,42 @@
 		<div id="svg-1"></div>
 
 	</div>
-	
+	<div id="scale"></div>
 	<div id = "header">
 			<div id = "title">New York City</div>
 			<div id = "subtitle">
-				TODO: add distance key, persistent URLs
+				TODO: persistent URLs
 				<br/><br/>
-				Inequality fractures the city, this map draws boundaries formed by income inequality inside New York City.
-				<br/><br/>				
-				This map visualizes differences in household median income, and draws boundaries between census block groups and tracts where the difference in income is greater than $25,000.<br/><br/>
-				Lines are constantly being drawn across our cities, visible fences in the form of roads and blocks, as well as invisible ones that describe descrepancies in the educational, financial and demographic makeup of our city. This map focuses on the differences that fracture the city rather than where poverty or wealth is concentrated, but it is no coincidence that where there is extreme wealth or poverty, areas are less diverse economically than the rest(see our variances map TODO:Link). 
-				 <br/><br/>
-				 Additionally, a graph of the nearest neighbors is displayed below. 
-				 By rolling over each area, a adjacent median incomes graph is shown to provide context for each block group. 
- The potential for growth of a place is dependent on the wellbeing and qualities its surroundings/neighbors just as humans are. Here we represent the median household income of the highlighted block group along with all its adjacent block groups in order of income to show the context of each area. 
+				Inequality fractures the city, this map draws boundaries formed by income inequality inside New York City
+				
+	<a href="#" id="example-show" class="showLink" onclick="showHide('example');return false;">... more</a></p>
+     <div id="example" class="more">
+			<p>
+This map visualizes differences in household median income, and draws boundaries between census block groups and tracts where the difference in income is greater than $25,000.
+			</p>
+			<p>
+Lines are constantly being drawn across our cities, visible fences in the form of roads and blocks, as well as invisible ones that describe descrepancies in the educational, financial and demographic makeup of our city. This map focuses on the differences that fracture the city rather than where poverty or wealth is concentrated, but it is no coincidence that where there is extreme wealth or poverty, areas are less diverse economically than the rest(see our variances map TODO:Link).
+			</p>
+			<p>
+Additionally, a graph of the nearest neighbors is displayed below.
+By rolling over each area, a adjacent median incomes graph is shown to provide context for each block group.
+The potential for growth of a place is dependent on the wellbeing and qualities its surroundings/neighbors just as humans are. Here we represent the median household income of the highlighted block group along with all its adjacent block groups in order of income to show the context of each area.
+			<p>
+
+     <p><a href="#" id="example-hide" class="hideLink" onclick="showHide('example');return false;">... less</a></p>
+ </div>
 		<div id="topDifferences">	
 			<p class="showTop">Show top differences</p>
 			<p class="hideTop">Hide top differences</p>
 		</div>
-			
 		</div>
-			<div id="svg-2-text">
-				Adjacent Median Incomes
-				<div id="current-details">
-				</div>
+			<div id="current-details">
 			</div>
 			<div id = "svg-2">
 			</div>
-			<a href="https://github.com/jjjiia/city_comparisons" target="blank">How this map is made >></a><br/><br/>
-			
 	</div>
-
+	
 	<script type="text/javascript" charset="utf-8">
-
 	var csv1 = "data/nyc_income.csv"
 	var geojson1 = "data/nyc_bg.geojson"
 	var overlap = "data/eggs.csv"
@@ -81,7 +84,32 @@
 	</script>
 	
 	  <script src="fracture_segments.js"></script>
+	<div id = "footer">
+		<div id ="credit">
+			<a href="http://youarehere.cc"><img src="static/images/logo.png" alt="" style="width:20px;height:25px"></a>
+			
+			This work is part of the <a href="http://youarehere.cc">You Are Here</a> project +
+	        <a href="http://socialcomputing.media.mit.edu"> The Social Computing Group </a>+
+	        <a href="http://media.mit.edu"target = "blank"> MIT Media Lab </a> + <a href="http://mit.edu" target = "blank"> MIT</a> | 
+			<a href="http://youarehere.cc/#/report" target = "blank">Feedback</a> | <a href="http://youarehere.cc/#/faq" target = "blank">FAQ</a>	 | <a href="https://github.com/jjjiia/city_comparisons" target="blank"><strong>How it's made</strong></a>
 
+			|
+			<script type="text/javascript">
+					  function embedMe(){
+					    var params = {
+					      map: window.location.href,
+					      width: 1000,
+						  height:750
+						  //width: $('body > .container').outerWidth(),
+					      //height: $('body > .container').outerHeight()
+					    };
+					    window.location.href = '/#/embed/'+encodeURIComponent(JSON.stringify(params));
+					  }
+					</script>
+					<a href="#" onclick="embedMe()">Embed</a>
+		</div>
+	<div class="spacer"></div>
+</div>
     </body>
 </html>
     
