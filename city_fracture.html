@@ -44,22 +44,31 @@
 	<div id = "header">
 			<div id = "title">New York City</div>
 			<div id = "subtitle">
-				TODO: add tract boundaries, add distance key, top differences graph, line rollovers, persistent URLs
+				TODO: add distance key, persistent URLs
 				<br/><br/>
-				Inequality fractures the city, this map draws boundaries formed by income inequality inside New York City 
+				Inequality fractures the city, this map draws boundaries formed by income inequality inside New York City.
 				<br/><br/>				
-				This map visualizes differences in household median income, and draws boundaries between census block groups and tracts where the difference in income is greater than $25,000.<br/>
-				Lines are constantly being drawn across our cities, visible fences in the form of roads and blocks, as well as invisible ones that describe descrepancies in the educational, financial and demographic makeup of our city. <br/><br/>
-			<a href="https://github.com/jjjiia/city_comparisons" target="blank">How this map is made >></a><br/><br/>
-			</div>
+				This map visualizes differences in household median income, and draws boundaries between census block groups and tracts where the difference in income is greater than $25,000.<br/><br/>
+				Lines are constantly being drawn across our cities, visible fences in the form of roads and blocks, as well as invisible ones that describe descrepancies in the educational, financial and demographic makeup of our city. This map focuses on the differences that fracture the city rather than where poverty or wealth is concentrated, but it is no coincidence that where there is extreme wealth or poverty, areas are less diverse economically than the rest(see our variances map TODO:Link). 
+				 <br/><br/>
+				 Additionally, a graph of the nearest neighbors is displayed below. 
+				 By rolling over each area, a adjacent median incomes graph is shown to provide context for each block group. 
+ The potential for growth of a place is dependent on the wellbeing and qualities its surroundings/neighbors just as humans are. Here we represent the median household income of the highlighted block group along with all its adjacent block groups in order of income to show the context of each area. 
+		<div id="topDifferences">	
+			<p class="showTop">Show top differences</p>
+			<p class="hideTop">Hide top differences</p>
+		</div>
+			
+		</div>
 			<div id="svg-2-text">
-				Adjacent Median Incomes</br></br>
-				The value/livability/etc as well as the potential for growth of a place is dependent 
-				on the wellbeing and qualities its surroundings/neighbors just as humans are.<br/><br/>
-				<div id="current-details"></div>
+				Adjacent Median Incomes
+				<div id="current-details">
+				</div>
 			</div>
 			<div id = "svg-2">
 			</div>
+			<a href="https://github.com/jjjiia/city_comparisons" target="blank">How this map is made >></a><br/><br/>
+			
 	</div>
 
 	<script type="text/javascript" charset="utf-8">
