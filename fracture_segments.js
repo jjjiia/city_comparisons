@@ -317,7 +317,6 @@ function calculateScaleSize(){
 	//console.log(screenDistance1km)
 	return screenDistance1km
 }
-
 function drawScale(){
 	var kmInPixels = calculateScaleSize()
 //	console.log(kmInPixels)
@@ -330,13 +329,15 @@ function drawScale(){
 			.attr("x",20)
 			.attr("y",20)
 			.attr("width",kmInPixels*5)
-			.attr("height",2)
+			.attr("height",1)
 			.attr("fill","#000")
+		
 		scale.append("text")
 			.attr("class","scale-text")
 			.text("5 km")
-			.attr("x",20)
+			.attr("x",40)
 			.attr("y",35)
+			.attr("font-size",12)
 }
 function drawTopDifferences(data){
 	var topFive = data.splice(0,35)
