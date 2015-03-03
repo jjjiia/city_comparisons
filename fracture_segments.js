@@ -13,16 +13,17 @@ var global = {
 	geojson1: null,
 	city2:null,
 	geojson2:null,
-	usMapWidth:900,
-	usMapHeight:1200,
+	usMapWidth:1200,
+	usMapHeight:900,
 	max:200000,
 	maxIncome:999999999,
 	gradientStart:"#fff",
 	gradientEnd:"#ddd",
-	scale:77000,
+	scale:80000,
 	center:[-74.1, 40.8],
-	neighbors:null
-	
+	neighbors:null,
+	translate:[0,0],
+	translateScale:1
 }
 $(function() {
 	queue()
@@ -44,6 +45,8 @@ function dataDidLoad(error, geojson1, city1, overlap, boroughs, neighbors) {
 	$("#topDifferences .hideTop").click(showTop)
 	d3.selectAll("#svg-1 svg g .topDifferences").attr("opacity",0)
 	drawScale()
+	window.location.hash = JSON.stringify([global.translate, global.scale])
+	
 }
 function hideTop(){
 	//console.log("show graph")
@@ -164,10 +167,15 @@ function zoomed() {
   	map.select(".map-item").style("stroke-width", 1.5 / d3.event.scale + "px");
 	var newScaleDistance = Math.round((5/d3.event.scale)* 100) / 100
 	d3.select("#scale .scale-text").text(newScaleDistance+"km")
-//  features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
+	window.location.hash = JSON.stringify([d3.event.translate, d3.event.scale])
 }
 function initNycMap(paths, data, column, svg,low,high,boroughs,neighbors,overlap) {
 	renderMap(paths,svg, global.usMapWidth,global.usMapHeight)
+	var parsedTranslate = JSON.parse(window.location.hash.substring(1))[0]
+	var parsedScale = JSON.parse(window.location.hash.substring(1))[1]
+	global.translate = parsedTranslate
+	global.translateScale = parsedScale
+	map.attr("transform", "translate(" + global.translate + ")scale(" + global.translateScale + ")");
 	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
 	renderNycMap(data,column,svg,low,high)
 	drawDifferences(data,svg,overlap)

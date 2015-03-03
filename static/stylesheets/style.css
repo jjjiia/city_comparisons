@@ -36,7 +36,6 @@ a{
 	margin-left:20px;
 	min-width:900px;
 	z-index: 9;
-	
 }
 
 
@@ -44,18 +43,21 @@ a{
 	padding-left:5px;
 	font-size: 46px;
 	line-height:100%;
-	margin-top:10px;
+	margin-top:20px;
 	min-width:900px;
 	
 }
 #subtitle{
-	padding-left:5px;
-	font-size:14px;
-	width:600px;
-	margin-top:10px;
+	position:absolute;
+	top:10px;
+	left:340px;
+	font-size:12px;
+	width:750px;
 }
 .chartLabel{
 	writing-mode: tb;
+	font-family:helvetica;
+	font-size:10px;
 }
 .percentLabel{
 	font-size:10px;
@@ -63,19 +65,25 @@ a{
 	fill:#ffffff;
 }
 
-#filters {position:absolute; left:10px; top:250px; padding:40px;}
-#svg-1 {position:absolute;  left:150px; top:250px; padding:0px;}
-#svg-2 {position:absolute; left:700px; top:250px; padding:0px;}
+#filters {position:absolute; left:10px; top:200px; padding:20px;}
+#pick-city {position:absolute; left:150px; top:140px;}
+#svg-1-label{position:absolute;  left:150px; top:170px; padding:0px; font-size:18px;}
+#svg-2-label{position:absolute; left:700px; top:170px; padding:0px;font-size:18px;}
 
-#chart1{position:absolute; left:150px; top:800px;width:500px; height:200px; padding:4px;}
-#chart2{position:absolute; left:700px; top:800px; width:500px; height:200px;padding:4px;}
+#svg-1 {position:absolute;  left:150px; top:170px; padding:0px;}
+#svg-2 {position:absolute; left:700px; top:170px; padding:0px;}
 
-#income-label{position:absolute; top:220px;left:20px; font-size:14px;color:red;}
+#chart1{position:absolute; left:150px; top:660px;width:500px; height:200px; padding:4px;}
+#chart2{position:absolute; left:700px; top:660px; width:500px; height:200px;padding:4px;}
 
+#income-label{position:absolute; top:200px;left:20px; font-size:14px;color:#3CA733;}
+
+#reset-all{position:absolute;top:720px;left:40px; font-size:14px;color:#ffffff;background-color:#3CA733;padding-left:7px;padding-right:7px;border-radius:8px;}
+#reset-all a{color:#ffffff;font-size:11px;}
 .d3-tip {
   line-height: 1;
   padding: 4px;
-  background: #ECAB23;
+  background: #3CA733;
   color: #fff;
   border-radius: 3px;
 }
@@ -85,7 +93,7 @@ a{
   font-size: 9px;
   width: 100%;
   line-height: 1;
-  color: #ECAB23;
+  color: #3CA733;
   content: "\25BC";
   position: absolute;
   text-align: center;
@@ -98,7 +106,7 @@ a{
 .d3-tip-nyc {
   line-height: 1;
   padding: 2px;
-  background: #ff2222;
+  background: #3CA733;
   color: #fff;
   border-radius: 3px;
 }
@@ -108,7 +116,7 @@ a{
   font-size: 9px;
   width: 100%;
   line-height: 1;
-  color: #ff2222;
+  color:#3CA733;
   content: "\25BC";
   position: absolute;
   text-align: center;
