@@ -23,7 +23,8 @@ var global = {
 	center:[-74.1, 40.8],
 	neighbors:null,
 	translate:[0,0],
-	translateScale:1
+	translateScale:1,
+	mapFillColor:null
 }
 $(function() {
 	queue()
@@ -172,7 +173,7 @@ function zoomed() {
 }
 function initNycMap(paths, data, column, svg,low,high,boroughs,neighbors,overlap) {
 	renderMap(paths,svg, global.usMapWidth,global.usMapHeight)
-	renderNycMap(data,column,svg,low,high)
+	renderNycMap(data,column,svg,low,high,neighbors)
 	//renderBoroughs(boroughs,svg,global.usMapWidth,global.usMapHeight)
 	drawDifferences(data,svg,overlap)
 	var differenceData = formatDifferenceData(data,svg,overlap)
@@ -248,6 +249,12 @@ function drawDifferences(data,svg,overlapData){
 		.enter()
 		.append("line")
 		.attr("class","map")
+		.attr("class", function(d){
+			return d.id1
+		})
+		.attr("class", function(d){
+			return d.id2
+		})
 		.attr("x1", function(d){
 			//console.log(d)
 			//return 5
@@ -445,13 +452,13 @@ function formatDifferenceData(data,svg,overlapData){
 		var income1 = parseInt(dataById[id1][0]["Median"])
 		var income2 = parseInt(dataById[id2][0]["Median"])
 		var incomeDifference = Math.abs(income1-income2)
-		incomes.push({lng1:overlapData[i]["lng1"],lat1:overlapData[i]["lat1"],lng2:overlapData[i]["lng2"],lat2:overlapData[i]["lat2"],difference:incomeDifference})
+		incomes.push({id1:overlapData[i]["id1"],id2:overlapData[i]["id2"],lng1:overlapData[i]["lng1"],lat1:overlapData[i]["lat1"],lng2:overlapData[i]["lng2"],lat2:overlapData[i]["lat2"],difference:incomeDifference})
 	}
 	//console.log(incomes)
 	var sortedIncomes = incomes.sort(function(a,b){return a["difference"]-b["difference"]}).reverse()
 	return sortedIncomes
 }
-function renderNycMap(data, column,svg,low,high) {
+function renderNycMap(data, column,svg,low,high,neighbors) {
 	var map = d3.select(svg).selectAll(".map-item")
 	var companiesByZipcode = table.group(data, ["Id"])
 	//	var largest = table.maxCount(companiesByZipcode)
@@ -477,34 +484,37 @@ function renderNycMap(data, column,svg,low,high) {
 		.attr("fill-opacity", 1)
 		.attr("fill",colorScale)
 		.attr("stroke-width",.5)
-			
-		
 		var tip = d3.tip()
 		  .attr('class', 'd3-tip-nyc')
 		  .offset([-10, 0])
 	
 		map.call(tip);
 		map.on('mouseover', function(d){
+			global.mapFillColor = d3.select(this).attr("fill")
+			
 			var currentZipcode = d.properties.GEOID
 			var currentIncome = table.group(data, ["Id"])[currentZipcode][0][column]
 			if(table.group(data, ["Id"])[currentZipcode]){
 				if(isNaN(currentIncome)){
-					tipText = "no data"
+					//tipText = "no data"
 					d3.selectAll("#svg-2 svg").remove()
 				}
 				else{
-				tipText = "block group: "+currentZipcode+"<br/>median household income:$"+ currentIncome
-				var test = "test"
-				tip.html(function(d){return tipText})
-				tip.show()
-				d3.select("#current-details").html("Adjacent Median Incomes</br> Census block group "+currentZipcode+" has median household income of $"+currentIncome)
-				drawNeighborsGraph(companiesByZipcode, currentZipcode)
+					//tipText = "block group: "+currentZipcode+"<br/>median household income:$"+ currentIncome
+					var test = "test"
+					//tip.html(function(d){return tipText})
+					//tip.show()
+					d3.select("#current-details").html("Adjacent Median Incomes</br> Census block group "+currentZipcode+" has median household income of $"+currentIncome)
+					drawNeighborsGraph(companiesByZipcode, currentZipcode)
+					d3.select(this).attr("fill","red")
 				}
 			}
 		})
 		.on('mouseout', function(d){
+			
+			d3.select(this).attr("fill",global.mapFillColor)
 			d3.select("#current-details").html("")
-			tip.hide()
+			//tip.hide()
 			d3.selectAll("#svg-2 svg").remove()
 		})
 	return map
@@ -528,7 +538,8 @@ function drawNeighborsGraph(data, id){
 	neighborsMedians.push({"id":id,"Median": selectedIdMedian})
 	var marginLeft = 30
 	var yAxis = d3.svg.axis().scale(incomeScaleReverse).orient("left").ticks(4)
-	
+	var sum = selectedIdMedian
+	var divideBy = 1
 	var neighborsList = global.neighbors[id]
 	for(var neighbor in neighborsList){
 		var currentId = neighborsList[neighbor]
@@ -536,22 +547,26 @@ function drawNeighborsGraph(data, id){
 		
 		if(!isNaN(income)){
 			neighborsMedians.push({"id":currentId,"Median":income})
+			sum = sum+income
+			divideBy +=1
 		}
 	}
 
 	var neighbors = neighborsMedians.items;
+	var average = sum/divideBy
+	//console.log(average)
 	//console.log(neighbors)
 	chart.selectAll("rect")
 		.data(sortObjectByValue(neighborsMedians))
 		.enter()
 		.append("rect")
 		.attr("x", function(d,i){
-			return i*12+10
+			return i*8+10
 		})
 		.attr("y", function(d){
 			return height-margin-incomeScale(d.Median)
 		})
-		.attr("width", 10)
+		.attr("width", 6)
 		.attr("height", function(d){
 			return incomeScale(d.Median)
 		})
@@ -562,6 +577,24 @@ function drawNeighborsGraph(data, id){
 				return "black"
 			}
 		})
+		
+		chart.append("rect")
+			.attr("class","average")
+			.attr("x", 0)
+			.attr("y", function(){
+				return height-margin-incomeScale(average)
+			})
+			.attr("width", divideBy*8+10)
+			.attr("height", 1)
+			.attr("fill","#aaa")
+		chart.append("text")
+			.attr("class","average-text")
+			.attr("x", 5)
+			.attr("y", function(){
+				return height-margin-incomeScale(average)-5
+			})
+			.text("Average $"+ parseInt(average))
+			.attr("font-size",10)
 	chart.append("g").attr("class", "y axis").call(yAxis)
 }
 function showHide(shID) {
